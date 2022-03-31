@@ -2,8 +2,15 @@
 #include <iostream>
 #include<cmath>
 #include<vector>
+#include<string>
 
 using namespace std;
+
+struct point {
+	int x;
+	int y;
+};
+
 
 class ECurve {
 public:
@@ -11,17 +18,25 @@ public:
 
 	void showEpab();								//显示循环群元素
 
-	int unEqLamda(int x1, int y1, int x2, int y2);	//计算P不等于Q时的Lamda
+	int unEqLamda(point P, point Q);	//计算P不等于Q时的Lamda
 
-	int equalLamda(int x1, int y1);					//计算P等于Q时的Lamda
+	int equalLamda(point P);					//计算P等于Q时的Lamda
 
-	void PplusQ(int x1, int y1, int x2, int y2, int &x, int &y);  //计算P+Q
+	point PplusQ(point P, point Q);  //计算P+Q
 
-	void kP(int k,int x1, int y1, int &x, int &y);                //计算kP 
+	point kP(int k,point P);                //计算kP 
+
+	int getOrd(point P);
+
 
 	vector<int> vx;        //存储循环群所有元素的x值
 	vector<int> vy;        //存储循环群所有元素的y值
-	
+
+	//point ECodePoint(int key,point A_Q,point B_Q);
+	//point DCodePoint(point m,int kb);
+	vector<int> EncodeMsg(int key, point P, point A_Q, point B_Q, string message);
+	string DcodeMsg(int key, point P, point A_Q, point B_Q, vector<int> secret);
+
 private:
 	int p, a, b;
 
@@ -50,66 +65,120 @@ void ECurve::showEpab()
 	cout << endl;
 }
 
-int ECurve::unEqLamda(int x1, int y1, int x2, int y2) {
+int ECurve::unEqLamda(point P, point Q) {
 
-	int up = ((y2 - y1) % p + p) % p, down = ((x2 - x1) % p + p) % p;
+	int up = ((Q.y - P.y) % p + p) % p, down = ((Q.x - P.x) % p + p) % p;
 	int temp = pow(down, p - 2);
 	return ((up*temp) % p + p) % p;
 }
 
-int ECurve::equalLamda(int x1, int y1) {
+int ECurve::equalLamda(point P) {
 
-	int up = ((3 * x1 * x1 + a) % p + p) % p, down = ((2 * y1) % p + p) % p;
+	int up = ((3 * P.x * P.x + a) % p + p) % p, down = ((2 * P.y) % p + p) % p;
 	int temp = pow(down, p - 2);
 	return ((up*temp) % p + p) % p;
 }
 
 
 
-void ECurve::PplusQ(int x1, int y1, int x2, int y2, int &x, int &y)
+point ECurve::PplusQ(point P , point Q )
 {
-	if ((x1 == 0 && y1 == 0) || (x2 == 0 && y2 == 0))   //P为O or Q为O  情况
-		if (x1 == 0)
-			x = x2, y = y2;
+	point temp;
+
+	if ((P.x == 0 && P.y == 0) || (Q.x == 0 && Q.y == 0))   //P为O or Q为O  情况
+		if (P.x == 0)
+			temp.x = Q.x, temp.y = Q.y;
 		else
-			x = x1, y = y1;
+			temp.x = P.x, temp.y = P.y;
 	else
 	{												//P，Q都不为O时
 		int lamda;
-		if (x1 == x2 && y1 == y2)					//P and Q 相等情况
-			lamda = equalLamda(x1, y1);
+		if (P.x == Q.x && P.y == Q.y)					//P and Q 相等情况
+			lamda = equalLamda(P);
 		else										//P and Q 不相等
-			lamda = unEqLamda(x1, y1, x2, y2);
-		x = ((lamda * lamda - x1 - x2) % p + p) % p;
-		y = ((lamda * (x1 - x) - y1) % p + p) % p;
+			lamda = unEqLamda(P, Q);
+		temp.x = ((lamda * lamda - P.x - Q.x) % p + p) % p;
+		temp.y = ((lamda * (P.x - temp.x) - P.y) % p + p) % p;
 	}
 	
 	bool isO = true;									//P+Q是否是无穷远点
 	int n;
 	for (n = 0; n < vx.size(); n++)
 	{
-		if ((x == (vx[n])) && (y == (vy[n])))	//若当前x,y值存在于循环群列表中(该表不包含0，0)，则不是无穷远点
+		if ((temp.x == (vx[n])) && (temp.y == (vy[n])))	//若当前x,y值存在于循环群列表中(该表不包含0，0)，则不是无穷远点
 		{
 			isO = false;
 			break;
 		}
 	}
 	if(isO)
-		x = 0, y = 0;
+		temp.x = 0, temp.y = 0;
+	return temp;
 }
 
-void ECurve::kP(int k, int x1, int y1, int &x, int &y)
+point ECurve::kP(int k, point P)
 {
+	point temp;
+	
 	if (k == 1)
-		x = x1, y = y1;
+		temp.x = P.x, temp.y = P.y;
 	else
 	{
-		int tx, ty;
-		PplusQ(x1, y1, x1, y1, x, y);            //k个P相加
+		temp = PplusQ(P, P);           //k个P相加
 		for (; k > 2; k--)
 		{
-			tx = x, ty = y;
-			PplusQ(tx, ty, x1, y1, x, y);
+			temp = PplusQ(temp, P);
 		}
 	}
+
+	return temp;
+}
+
+int ECurve::getOrd(point P)
+{
+	int n = 1;
+	point temp = P;
+	while (1)
+	{
+		n += 1;
+		temp = PplusQ(temp, P);
+		if (temp.x == 0 && temp.y == 0)
+			break;
+	}
+	return n;
+}
+
+
+
+
+vector<int> ECurve::EncodeMsg(int key, point P, point A_Q, point B_Q, string message)
+{
+	vector<int> secretMsg;
+	int num;
+	point temp;
+	temp = kP(key, B_Q);
+	if (temp.x == 0)
+		temp = PplusQ(P, temp);
+	for (int i = 0; i < message.length(); i++)
+	{
+		num = (int)message[i] * temp.x;
+		secretMsg.push_back(num);
+	}
+	return secretMsg;
+}
+//
+string ECurve::DcodeMsg(int key, point P, point A_Q, point B_Q, vector<int> secret)
+{
+	string Dmessage="";
+	point temp;
+	int num;
+	temp = kP(key, A_Q);
+	if (temp.x == 0)
+		temp = PplusQ(P, temp);
+	for (int i = 0; i < secret.size(); i++)
+	{
+		num = secret[i] / temp.x;
+		Dmessage += (char)num;
+	}
+	return Dmessage;
 }

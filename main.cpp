@@ -1,64 +1,107 @@
 #include"ECurve.h"
 
+
+
 namespace myspace
 {
 	void test_one()
 	{
-		int x, y;
-		//p=11、a=1、b=6、P(2,7)、Q(2,7)
-		ECurve *e = new ECurve(11, 1, 6);//p,a,b
-
-		e->showEpab();    //显示该椭圆曲线循环群元素
-		e->PplusQ(2, 7, 2, 7, x, y);//P(x1,y1),Q(x2,y2)
-		cout << "P+Q: (" << x << "," << y << ")"<<endl;
-		e->kP(15, 2, 7, x, y);        //k,x1,y1
-		cout << "kP: (" << x << "," << y << ")" << endl;
-		
-		delete e;
-	}
-
-	void test_two()
-	{
-		int x, y;
-		int p, a, b;
-
-		cout << "输入p(素数):";
-		cin >> p;
-		cout << "输入a:";
-		cin >> a;
-		cout << "输入b:";
-		cin >> b;
-		ECurve *e = new ECurve(p, a, b);//p,a,b
-		cout << "该椭圆曲线循环群元素";
-		e->showEpab();    //显示该椭圆曲线循环群元素
-		int x1, y1, x2, y2;//P(x1,y1),Q(x2,y2)
-		cout << "计算P+Q" << endl;
-		cout << "输入P坐标x1,y1: ";
-		cin >> x1 >> y1;
-		cout << "输入Q坐标x2,y2: ";
-		cin >> x2 >> y2;
-		e->PplusQ(x1, y1, x2, y2, x, y);//P(x1,y1)+Q(x2,y2)
-		cout << "P+Q: " << x << " " << y << endl;
-		int k;
-		cout << "计算kP" << endl;
-		cout << "输入生成元P坐标x1,y1: ";
-		cin >> x1 >> y1;
+		/*int p, a, b;
 		while (1)
 		{
-			cout << "输入k：";
-			cin >> k;
-			e->kP(k, x1, y1, x, y);        //k,x1,y1
-			cout << "kP: (" << x << "," << y <<")"<< endl;
-		} 
+			cout << "输入p(素数):";
+			cin >> p;
+			cout << "输入a:";
+			cin >> a;
+			cout << "输入b:";
+			cin >> b;
+			if ((4 * (a*a*a) + 27 * (b*b)) % p == 0)
+				cout << "选取的椭圆曲线不能用于加密，请重新选择\n";
+			else
+				break;
+		}*/
+		int p = 11, a = 1, b = 6;
+		//int p = 2833, a = 1, b = 1;
+		ECurve C(p, a, b);
+		C.showEpab();
 
-		delete e;
-	}	
+		cout << "在以上循环群中选出一个点P作为生成元:";
+		point P;
+		cin >> P.x >> P.y;
+		//P.x = 289;
+		//P.y = 1897;
+		//int n;
+		//n = C.getOrd(P);
+		//cout << "生成元P的阶为：" << n<<endl;
+
+		int B_private_key;
+		cout << "输入B的私钥:";
+		cin >> B_private_key;
+		point B_Q;
+		B_Q = C.kP(B_private_key, P);
+		cout <<"由生成元P("<<P.x<<","<<P.y<<"),私钥:"<< B_private_key <<"，生成B的公钥Q("<<B_Q.x<<","<<B_Q.y<<")"<<endl;
+		
+		
+		cout << endl << "===========A获得B的公钥，向B发送消息==========="<<endl;
+		cout << "输入A的私钥：";
+		int A_private_key;
+		cin >> A_private_key;
+		point A_Q;//A的公钥
+		A_Q = C.kP(A_private_key, P);
+
+		cout << "输入明文:";
+		string A_Msg;
+		cin >> A_Msg;
+
+		vector<int> A_EncodeMsg;//明文加密
+		A_EncodeMsg = C.EncodeMsg(A_private_key, P, A_Q, B_Q, A_Msg);
+		cout << "A加密后将：";
+		for (int i = 0; i < A_EncodeMsg.size(); i++)
+		{
+			cout << A_EncodeMsg[i]<<"-";
+		}
+		cout << "发送给B" << endl;
+
+
+		cout << endl << "===========B解密==========="<< endl;
+		int mykey;
+		while (1)
+		{
+			cout << "输入B的私钥：";
+			cin>>mykey;
+			string B_DecodeMsg;
+			B_DecodeMsg = C.DcodeMsg(mykey, P, A_Q, B_Q, A_EncodeMsg);
+			cout << "B解密后：";
+			cout << B_DecodeMsg;
+		}
+		
+		
+		
+
+	}
+	
+	
+	
+	
+	//
+	void test_four()
+	{
+		string str= "abc";
+		string str2;
+		str2 += 32;
+		int num = 3;
+		for (int i = 0; i < str2.length(); i++)
+		{
+			cout << (int)(str2[i]*num) << "-";
+		}
+	}
 }
 	
 
 int main()
 {
 	myspace::test_one();
-	//myspace::test_two();
+
+	//myspace::test_four();
 	return 0;
 }
