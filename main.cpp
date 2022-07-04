@@ -1,5 +1,6 @@
 #include"ECurve.h"
 
+
 namespace myspace
 {
 	void test_one()
@@ -62,48 +63,8 @@ namespace myspace
 		
 	}
 
-	void test_two()   //求元素的阶
-	{
-		int p = 11, a = 1, b = 6;
 
-		ECurve C(p, a, b);
-		C.showEpab();
-		point P;
-		cout << "=========求元素的阶=========" << endl;
-		while (1)
-		{
-			cout << "在以上循环群中选出一个点P:";
-			cin >> P.x >> P.y;
-			int n = C.getOrd(P);
-			cout << "生成元P(" << P.x << "," << P.y << ")的阶为：" << n << endl;
-		}
-		
-	}
-
-	void test_three() //求P+Q的结果
-	{
-		int p = 11, a = 1, b = 6;
-
-		ECurve C(p, a, b);
-		C.showEpab();
-		point P;
-		P.x = 2;
-		P.y = 7;
-		cout << "=========求P+Q=========" << endl;
-		while (1)
-		{
-			point Q;
-			cout << "在以上循环群中选出一个点Q:";
-			cin >> Q.x >> Q.y;
-
-			point T;
-			T = C.PplusQ(P, Q);
-			cout << "T: " << T.x << "," << T.y << endl;
-		}
-		
-	}
-
-	void test_four()//求kP
+	void test_five()
 	{
 		int p = 2833, a = 1, b = 1;
 
@@ -112,28 +73,73 @@ namespace myspace
 		point P;
 		P.x = 1341;
 		P.y = 854;
-		cout << "=========求kP=========" << endl;
-		while (1)
-		{
-			int k;
-			cout << "输入k:";
-			cin >> k;
-			point temp;
-			temp = C.kP(k, P);
-			cout<< "temp: " << temp.x << "," << temp.y << endl;
-		}
+
+		cout << "在以上循环群中选出一个点P(" << P.x << "," << P.y << ")" << endl;
+
+		int n = C.getOrd(P);
+		cout << "生成元P(" << P.x << "," << P.y << ")的阶为：" << n << endl;
+
+		int B_private_key;
+		cout << "输入B的私钥:";
+		cin >> B_private_key;
+		point B_Q;       //B的公钥
+		B_Q = C.kP(B_private_key, P);
+
+		cout << endl << "===========A获得B的公钥，向B发送消息===========" << endl;
+		cout << "输入A的私钥：";
+		int A_private_key;
+		cin >> A_private_key;
+
+		cout << "输入明文:";
+		string A_Msg;
+		cin >> A_Msg;
 	}
 
-	
+	void test_myhash()
+	{
+		const char* text = "asd";
+		int num = myhash(text);
+		cout << num;
+	}
+
+	void sign_verify()
+	{
+		int p = 2833, a = 1, b = 1;
+
+		ECurve C(p, a, b);
+		point P;
+		P.x = 1341;
+		P.y = 854;
+		int n = C.getOrd(P);
+
+		cout << "===========sign_verify()===========" << endl;
+		cout << "输入A的私钥：";
+		int A_private_key;
+		cin >> A_private_key;
+
+		const char* msg = "this is an important message";
+		const char* msg2 = "thix is an important message";
+
+		vector<int> sig;
+		sig = C.sign(msg, A_private_key, P, n);
+
+		bool test;
+		
+		test = C.verify(msg2, sig, P, n);
+		cout << test;
+	}
+
 }
 	
 
 int main()
 {
-	myspace::test_one();       //加密解密
+	//myspace::test_one();       //加密解密
 	//myspace::test_two();       //求元素的阶
 	//myspace::test_three();     //求P+Q的结果
 	//myspace::test_four();      //求kP
-
+	//myspace::test_five();
+	//myspace::test_myhash();
+	myspace::sign_verify();    //私钥输入随机一个数，修改msg和msg2，内容相同为1，不同为0
 	return 0;
 }

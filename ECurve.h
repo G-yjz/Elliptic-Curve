@@ -3,6 +3,9 @@
 #include<cmath>
 #include<vector>
 #include<string>
+#include <cstdlib>
+#include <ctime>
+#include"hash.h"
 
 using namespace std;
 
@@ -50,6 +53,9 @@ public:
 
 	vector<int> EncodeMsg(int key, point A_Q, point B_Q, string message);//对明文加密
 	string DcodeMsg(int key, vector<int> secret);                        //对密文解密
+
+	vector<int> sign(const char* msg, int A_private_key, point P, int n);
+	bool verify(const char* msg, vector<int> sig, point P, int n);
 
 private:
 	int p, a, b;
@@ -221,4 +227,57 @@ string ECurve::DcodeMsg(int B_key, vector<int> secret)
 		Dmessage += (char)num;
 	}
 	return Dmessage;
+}
+
+vector<int> ECurve::sign(const char* msg, int A_private_key, point P, int n)
+{
+	point A_Q;
+	A_Q = kP(A_private_key, P);
+
+	int d = rand() % (n - 2 + 1) + 1;//随机数[1,n)
+	point K;
+	K = kP(d, P);
+	int r = K.x%n;
+
+	int e;
+	e = myhash(msg);
+
+	int inv_d = get_inverse_element(d, n);
+	int s = (inv_d*(e + A_private_key * r)) % n;
+
+	vector<int> temp;
+	temp.push_back(A_Q.x);
+	temp.push_back(A_Q.y);
+	temp.push_back(r);
+	temp.push_back(s);
+
+	return temp;
+}
+
+bool ECurve::verify(const char* msg, vector<int> sig, point P, int n)
+{
+	point Q;
+	Q.x = sig[0];
+	Q.y = sig[1];
+	int r = sig[2];
+	int s = sig[3];
+
+	if ((r <= 0 && r >= n)|| (s <= 0 && s >= n))
+		return false;
+
+	int inv_s = get_inverse_element(s, n);
+	int w = inv_s % n;
+	int e = myhash(msg);
+
+	int u1 = (e * w) % n;
+	int u2 = (r * w) % n;
+
+	point temp, temp1, temp2;
+	temp1 = kP(u1, P);
+	temp2 = kP(u2, Q);
+	temp = PplusQ(temp1, temp2);
+	int v = temp.x%n;
+
+	return v == r;
+
 }
