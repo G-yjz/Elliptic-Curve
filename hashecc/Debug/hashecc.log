@@ -1,0 +1,15 @@
+﻿  main.cpp
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(49): warning C4244: “=”: 从“__int64”转换到“unsigned int”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(51): warning C4244: “=”: 从“__int64”转换到“unsigned int”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(61): warning C4244: “=”: 从“__int64”转换到“int”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(61): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(63): warning C4309: “=”: 截断常量值
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(67): warning C4244: “=”: 从“__int64”转换到“long”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\hash.h(68): warning C4244: “=”: 从“__int64”转换到“long”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\ecurve.h(94): warning C4244: “=”: 从“double”转换到“unsigned __int64”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\ecurve.h(123): warning C4244: “return”: 从“__int64”转换到“int”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\ecurve.h(139): warning C4244: “return”: 从“__int64”转换到“int”，可能丢失数据
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\ecurve.h(222): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\ecurve.h(243): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\gyjz\desktop\ecc\elliptic-curve\hashecc\main.cpp(44): warning C4018: “<”: 有符号/无符号不匹配
+  hashecc.vcxproj -> C:\Users\Gyjz\Desktop\ecc\Elliptic-Curve\Debug\hashecc.exe
